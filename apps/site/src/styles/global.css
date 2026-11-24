@@ -609,7 +609,7 @@ code {
 
 .prompt[aria-pressed="true"] {
   border-color: var(--amber);
-  box-shadow: inset 3px 0 0 var(--amber);
+  background: var(--panel-hi);
 }
 
 .verdict {
