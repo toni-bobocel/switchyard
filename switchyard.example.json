@@ -1,0 +1,59 @@
+{
+  "providers": {
+    "anthropic": {
+      "kind": "anthropic",
+      "baseUrl": "https://api.anthropic.com",
+      "apiKeyEnv": "ANTHROPIC_API_KEY",
+      "region": "us"
+    },
+    "mistral": {
+      "kind": "openai",
+      "baseUrl": "https://api.mistral.ai/v1",
+      "apiKeyEnv": "MISTRAL_API_KEY",
+      "region": "eu"
+    },
+    "local": {
+      "kind": "openai",
+      "baseUrl": "http://ollama:11434/v1",
+      "region": "on-prem",
+      "timeoutMs": 120000
+    }
+  },
+  "models": {
+    "mistral-small": { "provider": "mistral", "id": "mistral-small-latest", "price": { "input": 0.1, "output": 0.3 } },
+    "mistral-large": { "provider": "mistral", "id": "mistral-large-latest", "price": { "input": 2, "output": 6 } },
+    "claude-haiku": { "provider": "anthropic", "id": "claude-haiku-5-5", "price": { "input": 1, "output": 5 } },
+    "claude-sonnet": { "provider": "anthropic", "id": "claude-sonnet-5-5", "price": { "input": 3, "output": 15 } },
+    "claude-opus": { "provider": "anthropic", "id": "claude-opus-5-5", "price": { "input": 15, "output": 75 } },
+    "qwen-local": { "provider": "local", "id": "qwen3:14b", "price": { "input": 0, "output": 0 } }
+  },
+  "tiers": {
+    "fast": ["mistral-small", "qwen-local", "claude-haiku"],
+    "balanced": ["claude-sonnet", "mistral-large"],
+    "reasoning": ["claude-opus", "mistral-large"]
+  },
+  "teams": {
+    "support": {
+      "keys": ["aa6cc80f6388bc9521958d7300ccb0260cd219ef8285ea2ca56c515c83d94af6"],
+      "budgetUsd": 300,
+      "pii": "redact",
+      "residency": ["eu", "on-prem"]
+    },
+    "growth": {
+      "keys": ["cd407749f6ac9ca0f12863e599d3b7a87c7b3cbf997341bff79c132b411c637c"],
+      "budgetUsd": 800,
+      "pii": "redact"
+    },
+    "legal": {
+      "keys": ["7e0d69cafa30d0ad09c76e1a240777b53fd32889f5b3f3754f96664a73c1e087"],
+      "budgetUsd": 150,
+      "pii": "block",
+      "residency": ["on-prem"]
+    },
+    "platform": {
+      "keys": ["742fdf6e12a8c421228baf5e2279681b1100b553136710b7b7ecead57e95011e"],
+      "budgetUsd": 100,
+      "admin": true
+    }
+  }
+}

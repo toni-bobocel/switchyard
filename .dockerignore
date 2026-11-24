@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/.turbo
+**/.astro
+apps/site
+.git
+.env
+*.db*

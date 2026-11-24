@@ -1,0 +1,20 @@
+name: switchyard
+
+services:
+  gateway:
+    build: { context: ., dockerfile: apps/gateway/Dockerfile }
+    ports: ["8080:8080"]
+    env_file: [{ path: .env, required: false }]
+    volumes:
+      - ./switchyard.example.json:/etc/switchyard/switchyard.json:ro
+      - ledger:/var/lib/switchyard
+
+  # The on-prem tier. Pull a model once: docker compose exec ollama ollama pull qwen3:14b
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+
+volumes:
+  ledger:
+  ollama:
