@@ -6,7 +6,8 @@ COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --filter @switchyard/gateway... \
  && pnpm --filter @switchyard/gateway... build \
- && pnpm --filter @switchyard/gateway deploy --prod --legacy /out \n && mkdir /ledger
+ && pnpm --filter @switchyard/gateway deploy --prod --legacy /out \
+ && mkdir /ledger
 
 FROM gcr.io/distroless/nodejs24-debian12:nonroot
 WORKDIR /app
