@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: example config is valid
+        run: node -e "import('./apps/gateway/dist/config.js').then(m => m.loadConfig('switchyard.example.json'))"
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/gateway/Dockerfile
+          load: true
+          tags: switchyard:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: boots and answers health checks
+        run: |
+          docker run -d --name sy -p 8080:8080 \
+            -v "$PWD/switchyard.example.json:/etc/switchyard/switchyard.json:ro" switchyard:ci
+          for i in $(seq 1 20); do curl -sf localhost:8080/healthz && exit 0; sleep 0.5; done
+          docker logs sy
+          exit 1
