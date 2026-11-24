@@ -69,8 +69,9 @@ export function anthropic(fetch: Fetch, baseUrl: string, apiKey: string | undefi
           if (event.type === 'message_start' && 'message' in event) {
             usage.input = event.message.usage.input_tokens
           } else if (event.type === 'content_block_delta' && 'delta' in event) {
-            if ('text' in event.delta && event.delta.text)
+            if ('text' in event.delta && event.delta.text) {
               yield { type: 'text', text: event.delta.text }
+            }
           } else if (event.type === 'message_delta' && 'usage' in event) {
             usage.output = event.usage.output_tokens
             finish = finishReason[event.delta.stop_reason ?? ''] ?? finish

@@ -34,7 +34,7 @@ export class Breakers {
 
   snapshot() {
     return Object.fromEntries(
-      [...this.#states].map(([p, s]) => [p, this.available(p) ? 'closed' : 'open']),
+      [...this.#states.keys()].map((p) => [p, this.available(p) ? 'closed' : 'open']),
     )
   }
 }
