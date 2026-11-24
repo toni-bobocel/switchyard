@@ -8,8 +8,8 @@ import { onPolicy, type Policy, policy, setPolicy } from './policy'
 
 gsap.registerPlugin(Draggable, InertiaPlugin, CustomEase, CustomWiggle, ScrambleTextPlugin)
 
-const NORMAL = -14
-const REVERSED = 14
+const NORMAL = -9
+const REVERSED = 9
 const PIVOT = '30 212'
 
 // A lever is thrown hard and stops on the quadrant with a thud.

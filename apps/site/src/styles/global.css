@@ -822,9 +822,9 @@ code {
 
 .levers {
   position: relative;
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
   padding: 2rem 1.2rem 0;
   border-radius: 0.9rem 0.9rem 0 0;
   background: linear-gradient(180deg, transparent, rgb(0 0 0 / 0.25));
@@ -1062,7 +1062,6 @@ code {
 
   .levers {
     overflow-x: auto;
-    justify-content: flex-start;
-    gap: 1.2rem;
+    grid-template-columns: repeat(5, minmax(5.5rem, 1fr));
   }
 }

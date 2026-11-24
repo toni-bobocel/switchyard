@@ -199,9 +199,16 @@ export class Yard {
       const y2 = platformY(b) + 8
       labels.append(
         el('path', { d: `M1150 ${y1} h8 V${y2} h-8`, class: 'rail is-dark', 'stroke-width': 1.5 }),
-        Object.assign(el('text', { x: 1170, y: (y1 + y2) / 2 + 4, class: 'tier-label' }), {
-          textContent: tier.toUpperCase(),
-        }),
+        Object.assign(
+          el('text', {
+            x: 1172,
+            y: (y1 + y2) / 2,
+            class: 'tier-label',
+            'text-anchor': 'middle',
+            transform: `rotate(90 1172 ${(y1 + y2) / 2})`,
+          }),
+          { textContent: tier.toUpperCase() },
+        ),
       )
     }
 
