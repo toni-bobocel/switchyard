@@ -6,7 +6,7 @@ import type { Message } from '../providers/types.js'
 // free, deterministic and explainable in a log line. See docs/adr/0003.
 
 const REASONING =
-  /\b(why|prove|derive|step[- ]by[- ]step|trade-?offs?|architecture|design|plan|compare|analy[sz]e|root cause|pourquoi|démontre|analyse|compare[rz]?)\b/gi
+  /\b(why|prove|derive|step[- ]by[- ]step|trade-?offs?|architecture|design|plan|compare[rz]?|analy[sz]e|root cause|pourquoi|démontre)\b/gi
 const TRIAGE =
   /\b(classify|categori[sz]e|extract|tag|label|translate|yes or no|sentiment|summari[sz]e in|traduis|classe|extrais|résume en)\b/gi
 const CODE = /```|^\s{4}\S|\bat \S+ \(\S+:\d+:\d+\)|Traceback \(most recent call last\)/m
