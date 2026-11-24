@@ -1,16 +1,9 @@
 ---
+import Title from '../components/Title.astro'
+import { markSvg as mark } from '../mark'
 import '../styles/global.css'
 
 const repo = 'https://github.com/toni-bobocel/switchyard'
-
-const quickstart = [
-  '<span class="c"># point any OpenAI SDK at the gateway</span>',
-  '<span class="k">curl</span> localhost:8080/v1/chat/completions \\',
-  '  -H "authorization: Bearer sy_demo_support" \\',
-  '  -H "x-switchyard-feature: ticket-triage" \\',
-  `  -d '{"model":"auto","messages":[{"role":"user","content":"..."}]}'`,
-].join('\n')
-
 const fence = '`'.repeat(3)
 const prompts = [
   {
@@ -28,27 +21,77 @@ const prompts = [
   },
 ].map((p) => ({ ...p, input: p.code ? `${p.text}\n${fence}ts\n${p.code}\n${fence}` : p.text }))
 
-const levers = [
-  { key: 'outage', color: 'red', no: 1, label: 'Vendor down' },
-  { key: 'euOnly', color: 'blue', no: 2, label: 'EU only' },
-  { key: 'blockPii', color: 'yellow', no: 3, label: 'Block PII' },
-  { key: 'budgetCap', color: 'black', no: 4, label: 'Budget out' },
-  { key: 'rush', color: 'white', no: 5, label: 'Rush hour' },
+const switches = [
+  { key: 'outage', name: 'Vendor outage' },
+  { key: 'euOnly', name: 'EU only' },
+  { key: 'blockPii', name: 'Block personal data' },
+  { key: 'budgetCap', name: 'Budget spent' },
+  { key: 'rush', name: 'Rush hour' },
 ]
 
-const status = [
-  { key: 'outage', name: 'Anthropic' },
-  { key: 'euOnly', name: 'Residency' },
-  { key: 'blockPii', name: 'Personal data' },
-  { key: 'budgetCap', name: 'Growth budget' },
-  { key: 'rush', name: 'Traffic' },
+const checks = [
+  { kind: 'EMAIL', name: 'Email', how: 'pattern' },
+  { kind: 'IBAN', name: 'IBAN', how: 'mod 97' },
+  { kind: 'PHONE', name: 'Phone', how: 'numbering plan' },
+  { kind: 'CARD', name: 'Card', how: 'luhn' },
 ]
 
 const adrs = [
-  ['01', 'One OpenAI-compatible surface', '0001-openai-compatible-surface.md', 'adoption is a base URL'],
-  ['02', 'Redact before routing, restore after', '0002-redact-before-routing.md', 'gdpr'],
-  ['03', 'Heuristic routing, not a classifier model', '0003-heuristic-routing.md', 'cost'],
-  ['04', 'An integer ledger on SQLite, for now', '0004-ledger-on-sqlite.md', 'finops'],
+  {
+    title: 'One OpenAI-compatible surface',
+    gist: 'Adoption is a base URL. Vendor dialects are translated at the edge, never in client code.',
+    tag: 'lock-in',
+    file: '0001-openai-compatible-surface.md',
+  },
+  {
+    title: 'Redact before routing, restore after',
+    gist: 'Stable tokens keep the task solvable; checksums keep order numbers out of the redaction log.',
+    tag: 'gdpr',
+    file: '0002-redact-before-routing.md',
+  },
+  {
+    title: 'Heuristics, not a classifier model',
+    gist: 'Free, deterministic, explainable in one header. The ledger collects what is needed to replace it.',
+    tag: 'cost',
+    file: '0003-heuristic-routing.md',
+  },
+  {
+    title: 'An integer ledger on SQLite, for now',
+    gist: 'Micro-dollars so the month reconciles to the cent; the move to Postgres is one class.',
+    tag: 'finops',
+    file: '0004-ledger-on-sqlite.md',
+  },
+]
+
+const stack = [
+  'TypeScript',
+  'Hono',
+  'Zod',
+  'node:sqlite',
+  'pnpm',
+  'Turborepo',
+  'Vitest',
+  'Biome',
+  'Docker',
+  'Astro',
+  'GSAP',
+  'GitHub Actions',
+]
+
+const quickstart = [
+  '<span class="c"># any OpenAI SDK, one base URL</span>',
+  '<span class="k">curl</span> localhost:8080/v1/chat/completions \\',
+  '  -H "authorization: Bearer sy_demo_support" \\',
+  '  -H "x-switchyard-feature: ticket-triage" \\',
+  `  -d '{"model":"auto","messages":[{"role":"user","content":"..."}]}'`,
+].join('\n')
+
+const nav = [
+  ['Live traffic', '#live'],
+  ['Inspect', '#inspect'],
+  ['Route', '#route'],
+  ['Account', '#account'],
+  ['Control room', '#control'],
 ]
 ---
 
@@ -57,130 +100,165 @@ const adrs = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Switchyard — every prompt passes the box</title>
+    <title>Switchyard — every prompt passes one box</title>
     <meta
       name="description"
       content="An OpenAI-compatible LLM gateway: PII redaction, complexity routing, vendor fallback and per-team budgets."
     />
-    <meta name="theme-color" content="#17211d" />
+    <meta name="theme-color" content="#0b0b0a" />
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
+    <link rel="preload" href={`${import.meta.env.BASE_URL}fonts/DepartureMono-Regular.woff2`} as="font" type="font/woff2" crossorigin />
   </head>
   <body>
-    <header class="masthead">
-      <span class="plate">Switchyard</span>
-      <nav class="mono caps">
-        <a href="#inspect">Inspect</a>
-        <a href="#route">Route</a>
-        <a href="#account">Account</a>
-        <a href="#levers">Levers</a>
-        <a href={repo}>Source ↗</a>
-      </nav>
+    <canvas class="field" data-field aria-hidden="true"></canvas>
+
+    <header class="bar">
+      <a class="bar__brand" href="#top"><b>SWITCHYARD</b><span class="label">/ gateway</span></a>
+      <button class="bar__menu" type="button" data-menu-open>MENU =</button>
+      <div class="bar__actions">
+        <a class="icon-btn" href={repo} aria-label="Source on GitHub">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"
+            ><path
+              d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.34c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"
+            ></path></svg
+          >
+        </a>
+        <a class="icon-btn mono" href="#sdk" aria-label="Quickstart">&gt;_</a>
+        <a class="btn" href={repo}>Read the source <i>»</i></a>
+      </div>
     </header>
 
-    <main>
-      <section class="hero">
-        <div class="hero__top">
-          <h1 class="hero__title">
-            <span style="display:block;overflow:hidden"><span class="line" style="display:block">Every prompt</span></span>
-            <span style="display:block;overflow:hidden"><span class="line" style="display:block">passes <span class="lit">the box.</span></span></span>
-          </h1>
-          <p class="hero__lede">
-            <strong>An OpenAI-compatible gateway for a company's LLM traffic.</strong> Personal data is stripped before
-            anything leaves, each request goes to the cheapest model that can handle it, a vendor outage becomes a
-            detour, and every cent is charged to a team and a feature.
-          </p>
-        </div>
+    <nav class="menu" data-menu aria-label="Sections">
+      <button class="btn btn--ghost menu__close" type="button" data-menu-close>Close</button>
+      {nav.map(([name, href]) => <a href={href}><span>{name}</span></a>)}
+      <a href={repo}><span>Source</span></a>
+    </nav>
 
-        <div class="panel">
-          <div class="panel__screws" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-          <svg data-yard="hero" role="img" aria-label="Live diagram: requests from four teams pass the gateway and are routed to six models"></svg>
-          <ol class="ticker" data-ticker aria-live="off"></ol>
-        </div>
+    <div class="ticks" aria-hidden="true">{Array.from({ length: 44 }, () => <i />)}</div>
 
-        <div class="hero__foot mono">
-          <span>Each lamp is a thousand requests. Scroll faster, the yard gets busier.</span>
-          <span>Interlocking № 7</span>
+    <div class="page" id="top">
+      <div class="sub label">
+        <span>LLM gateway</span>
+        <span data-clock>Paris</span>
+        <span class="live" data-live>All vendors up</span>
+      </div>
+
+      <section class="hero" data-hero>
+        <p class="hero__lede">
+          Every prompt a company sends to a language model passes one box. It strips personal data, picks the cheapest
+          model that can answer, survives vendor outages and bills every cent to a team.
+        </p>
+        <h1 class="hero__name" aria-label="Switchyard">
+          <span class="row"><span>Switchyard<span class="mark" set:html={mark} /></span></span>
+        </h1>
+      </section>
+
+      <section class="wipe" data-wipe aria-hidden="true">
+        <div class="wipe__stage"><div class="wipe__mark" set:html={mark} /></div>
+      </section>
+      <svg class="wave" viewBox="0 0 1440 200" preserveAspectRatio="none" aria-hidden="true">
+        <path data-wave d="M0 0 H1440 V120 C1100 200 860 40 520 80 C300 110 140 170 0 150 Z" fill="currentColor" />
+      </svg>
+
+      <section class="box" id="live">
+        <div class="head">
+          <div>
+            <span class="label">Right now</span>
+            <Title text="Live traffic" />
+          </div>
+          <div class="head__side">
+            <p>
+              Four teams, six models, one gate. Each moving dash is a thousand requests; scroll faster and the yard
+              gets busier.
+            </p>
+            <a class="btn btn--ghost" href={`${repo}/blob/main/switchyard.example.json`}>The config »</a>
+          </div>
+        </div>
+        <div class="cell">
+          <svg data-yard="hero" role="img" aria-label="Requests from four teams pass the gate and are routed to six models"></svg>
+        </div>
+        <ol class="ticker mono" data-ticker aria-live="off"></ol>
+      </section>
+
+      <section class="box" id="inspect" data-inspect>
+        <div class="head">
+          <div>
+            <span class="label">Inspect</span>
+            <Title text="Nothing personal leaves" />
+          </div>
+          <div class="head__side">
+            <p>
+              Values become stable tokens before a model is chosen, and come back on the way out, even split across
+              streamed chunks. Cards, IBANs and social security numbers only count when their checksum holds.
+            </p>
+            <button class="btn btn--ghost" type="button" data-replay>Run again »</button>
+          </div>
+        </div>
+        <div class="split">
+          <article class="doc" data-prompt>
+            <span class="label">Prompt · support / refund-desk</span>
+            <p class="doc__body">
+              Refund <span class="pii" data-kind="EMAIL" data-token="⟦EMAIL_1⟧">jeanne.martin@acme.fr</span>{' '}to{' '}
+              <span class="pii" data-kind="IBAN" data-token="⟦IBAN_1⟧">FR76 3000 6000 0112 3456 7890 189</span>, then
+              text her on{' '}<span class="pii" data-kind="PHONE" data-token="⟦PHONE_1⟧">06 12 34 56 78</span>. Card on
+              file:{' '}<span class="pii" data-kind="CARD" data-token="⟦CARD_1⟧">4111 1111 1111 1111</span>.
+            </p>
+          </article>
+          <article class="doc" data-answer>
+            <span class="label">Answer · claude-sonnet · us</span>
+            <p class="doc__body">
+              Done. €42.00 refunded to{' '}<span class="pii" data-token="⟦IBAN_1⟧">FR76 3000 6000 0112 3456 7890 189</span>;
+              confirmation sent to{' '}<span class="pii" data-token="⟦EMAIL_1⟧">jeanne.martin@acme.fr</span> and a text
+              queued for{' '}<span class="pii" data-token="⟦PHONE_1⟧">06 12 34 56 78</span>.
+            </p>
+            <span class="stamp label"></span>
+          </article>
+        </div>
+        <div class="grid4 checks">
+          {
+            checks.map((c) => (
+              <div data-kind={c.kind}>
+                <b>{c.name}</b>
+                <span class="label">{c.how}</span>
+              </div>
+            ))
+          }
         </div>
       </section>
 
-      <section class="chapter" id="inspect">
-        <header class="chapter__head">
-          <div>
-            <span class="plate plate--small">Inspect</span>
-            <h2 class="chapter__title">Nothing personal <em>leaves the box.</em></h2>
-          </div>
-          <p class="chapter__aside">
-            Emails, phones, IBANs, card and social security numbers are swapped for stable tokens before a model is
-            chosen. Card, IBAN and NIR are only flagged when their checksum holds. The answer is restored on the way
-            out, even when a token is split across streamed chunks.
-          </p>
-        </header>
-
-        <div class="inspect" data-inspect>
-          <article class="ticket" data-prompt>
-            <div class="ticket__head mono caps"><span>Prompt</span><span>support / refund-desk</span></div>
-            <p class="ticket__body">
-              Refund <span class="pii" data-kind="EMAIL" data-token="⟦EMAIL_1⟧">jeanne.martin@acme.fr</span> to
-              <span class="pii" data-kind="IBAN" data-token="⟦IBAN_1⟧">FR76 3000 6000 0112 3456 7890 189</span>,
-              then text her on <span class="pii" data-kind="PHONE" data-token="⟦PHONE_1⟧">06 12 34 56 78</span>.
-              Card on file: <span class="pii" data-kind="CARD" data-token="⟦CARD_1⟧">4111 1111 1111 1111</span>.
-            </p>
-          </article>
-
-          <div class="inspect__arrow">
-            <ul class="checks mono">
-              <li data-kind="EMAIL"><i></i>email · pattern</li>
-              <li data-kind="IBAN"><i></i>iban · mod 97</li>
-              <li data-kind="PHONE"><i></i>phone · fr plan</li>
-              <li data-kind="CARD"><i></i>card · luhn</li>
-            </ul>
-            <button class="replay mono caps" data-replay type="button">Run again</button>
-          </div>
-
-          <article class="ticket" data-answer>
-            <div class="ticket__head mono caps"><span>Answer</span><span>claude-sonnet · us</span></div>
-            <p class="ticket__body">
-              Done. €42.00 refunded to <span class="pii" data-token="⟦IBAN_1⟧">FR76 3000 6000 0112 3456 7890 189</span>;
-              confirmation sent to <span class="pii" data-token="⟦EMAIL_1⟧">jeanne.martin@acme.fr</span> and an SMS
-              queued for <span class="pii" data-token="⟦PHONE_1⟧">06 12 34 56 78</span>.
-            </p>
-            <span class="stamp mono caps"></span>
-          </article>
-        </div>
+      <section class="marquee" aria-hidden="true" data-marquee>
+        <div class="marquee__row"><span>redact<em>.</em></span><span>route<em>.</em></span><span>fallback<em>.</em></span><span>account<em>.</em></span><span>budget<em>.</em></span></div>
+        <div class="marquee__row"><span>tokens<em>.</em></span><span>tiers<em>.</em></span><span>breakers<em>.</em></span><span>ledgers<em>.</em></span><span>streams<em>.</em></span></div>
+        <div class="marquee__row"><span>gdpr<em>.</em></span><span>residency<em>.</em></span><span>latency<em>.</em></span><span>finops<em>.</em></span><span>trust<em>.</em></span></div>
       </section>
 
-      <section class="chapter" id="route">
-        <header class="chapter__head">
+      <section class="box" id="route" data-route-desk>
+        <div class="head">
           <div>
-            <span class="plate plate--small">Route</span>
-            <h2 class="chapter__title">The right model <em>for the job.</em></h2>
+            <span class="label">Route</span>
+            <Title text="Right model, right price" />
           </div>
-          <p class="chapter__aside">
-            No classifier model, no extra round trip: free signals scored in microseconds, every point listed in the
-            <code>x-switchyard-route</code> header. This panel runs the gateway's own <code>classify()</code>.
-          </p>
-        </header>
-
-        <div class="route-desk" data-route-desk>
-          <div class="prompts">
+          <div class="head__side">
+            <p>
+              No classifier model and no extra round trip: free signals, scored in microseconds, every point listed in
+              a response header. This panel runs the gateway's own <code class="mono">classify()</code>.
+            </p>
+          </div>
+        </div>
+        <div class="split">
+          <div>
             {
               prompts.map((p, i) => (
-                <button
-                  class="prompt"
-                  type="button"
-                  aria-pressed={i === 0 ? 'true' : 'false'}
-                  data-text={p.input}
-                >
-                  <small class="mono caps">{p.label}</small>
-                  <span>{p.text}</span>
+                <button class="prompt" type="button" aria-pressed={i === 0 ? 'true' : 'false'} data-text={p.input}>
+                  <span class="label">{p.label}</span>
+                  {p.text}
                   {p.code && <code>{p.code}</code>}
                 </button>
               ))
             }
           </div>
-
           <div class="verdict">
-            <div class="panel">
+            <div>
               <svg class="junction yard" viewBox="0 0 640 260" aria-hidden="true">
                 <path class="rail" d="M20 130 H230 L314 46 H560" />
                 <path class="rail" d="M230 130 H560" />
@@ -188,138 +266,147 @@ const adrs = [
                 <path class="route" data-route="fast" />
                 <path class="route" data-route="balanced" />
                 <path class="route" data-route="reasoning" />
-                <text class="tier-label" x="330" y="36">FAST</text>
-                <text class="tier-label" x="330" y="120">BALANCED</text>
-                <text class="tier-label" x="330" y="204">REASONING</text>
-                <text class="sub" x="330" y="64">mistral-small · qwen-local · haiku</text>
-                <text class="sub" x="330" y="148">sonnet · mistral-large · qwen-local</text>
-                <text class="sub" x="330" y="232">opus · mistral-large · qwen-local</text>
-                <circle class="lamp" data-lamp="fast" cx="584" cy="46" r="8" />
-                <circle class="lamp" data-lamp="balanced" cx="584" cy="130" r="8" />
-                <circle class="lamp" data-lamp="reasoning" cx="584" cy="214" r="8" />
-                <g class="train" style="opacity:0"><rect x="-15" y="-5" width="30" height="10" rx="5" /></g>
+                <text class="tier-label" x="330" y="34">FAST</text>
+                <text class="tier-label" x="330" y="118">BALANCED</text>
+                <text class="tier-label" x="330" y="202">REASONING</text>
+                <text class="meta" x="330" y="66">mistral-small · qwen-local · haiku</text>
+                <text class="meta" x="330" y="150">sonnet · mistral-large · qwen-local</text>
+                <text class="meta" x="330" y="234">opus · mistral-large · qwen-local</text>
+                <circle class="lamp" data-lamp="fast" cx="584" cy="46" r="6" />
+                <circle class="lamp" data-lamp="balanced" cx="584" cy="130" r="6" />
+                <circle class="lamp" data-lamp="reasoning" cx="584" cy="214" r="6" />
+                <g class="train" style="opacity:0"><rect x="-12" y="-3" width="24" height="6" /></g>
                 <path class="blade" d="M230 127 L264 129 L264 131 L230 133Z" />
               </svg>
             </div>
-            <ul class="reasons"></ul>
+            <ul class="reasons mono"></ul>
             <div class="score">
-              <span class="mono caps">score <b data-score>0.0</b></span>
-              <strong data-tier>—</strong>
+              <span class="label">score <b data-score>0.0</b></span>
+              <strong data-tier>·</strong>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="chapter" id="account">
-        <header class="chapter__head">
+      <section class="box" id="account">
+        <div class="head">
           <div>
-            <span class="plate plate--small">Account</span>
-            <h2 class="chapter__title">Every cent <em>has an owner.</em></h2>
+            <span class="label">Account</span>
+            <Title text="Every cent has an owner" />
           </div>
-          <p class="chapter__aside">
-            One ledger row per request, in integer micro-dollars so a month reconciles to the cent. Budgets are
-            checked before the call: a team that is out gets a 402, not a surprise invoice. The board ticks with the
-            demo traffic above.
-          </p>
-        </header>
-
-        <div class="board">
-          <div>
-            <p class="mono caps" style="margin:0 0 .7rem;color:var(--cream-dim)">Month to date</p>
-            <div class="flaps" data-flaps aria-live="off"></div>
-          </div>
-          <div class="tabs mono caps" role="tablist" data-tabs>
-            <button class="tab" role="tab" type="button" data-group="team" aria-selected="true">By team</button>
-            <button class="tab" role="tab" type="button" data-group="feature" aria-selected="false">By feature</button>
-            <button class="tab" role="tab" type="button" data-group="model" aria-selected="false">By model</button>
+          <div class="head__side">
+            <div>
+              <span class="label">Month to date, ticking with the traffic above</span>
+              <div class="total" data-total>$0.00</div>
+            </div>
+            <div class="tabs" role="tablist" data-tabs>
+              <button class="btn btn--ghost tab" role="tab" type="button" data-group="team" aria-selected="true">Team</button>
+              <button class="btn btn--ghost tab" role="tab" type="button" data-group="feature" aria-selected="false">Feature</button>
+              <button class="btn btn--ghost tab" role="tab" type="button" data-group="model" aria-selected="false">Model</button>
+            </div>
           </div>
         </div>
         <div class="ledger" data-ledger></div>
       </section>
 
-      <section class="chapter" id="levers">
-        <header class="chapter__head">
+      <section class="box" id="control">
+        <div class="head">
           <div>
-            <span class="plate plate--small">Levers</span>
-            <h2 class="chapter__title">Pull a lever, <em>change the policy.</em></h2>
+            <span class="label">Control room</span>
+            <Title text="Throw a switch" />
           </div>
-          <p class="chapter__aside">
-            Drag a lever or click it. The panel below and the one at the top obey: a vendor outage reroutes, EU-only
-            darkens the US tracks, blocked teams are held at the gate.
-          </p>
-        </header>
-
-        <div class="panel" style="margin-bottom:2rem">
-          <div class="panel__screws" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-          <svg data-yard="desk" aria-hidden="true"></svg>
+          <div class="head__side">
+            <p>
+              Policy is live. Take a vendor down and traffic reroutes, pin the company to the EU and the US tracks go
+              dark, run a team out of budget and its requests stop at the gate.
+            </p>
+          </div>
         </div>
-
-        <div class="frame">
-          <div class="levers" data-levers>
-            {
-              levers.map((l) => (
-                <button class="lever" type="button" data-key={l.key} data-color={l.color} aria-pressed="false" aria-label={l.label}>
-                  <svg viewBox="0 0 60 230" aria-hidden="true">
-                    <g class="arm">
-                      <rect class="shaft" x="26" y="24" width="8" height="190" rx="3" />
-                      <rect x="17" y="6" width="26" height="30" rx="7" fill="#cfc7b0" stroke="#00000066" />
-                      <rect x="22" y="40" width="16" height="7" rx="2" fill="#a59e89" />
-                    </g>
-                    <circle cx="30" cy="212" r="7" fill="#6e6a60" stroke="#00000088" />
-                  </svg>
-                  <span class="plate plate--small lever__no">{l.no}</span>
-                  <span class="lever__label mono caps">{l.label}</span>
-                </button>
-              ))
-            }
-          </div>
-          <ul class="status" data-status>
-            {
-              status.map((s) => (
-                <li data-key={s.key}>
-                  <b>{s.name}</b>
-                  <span class="mono" />
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-      </section>
-
-      <section class="chapter" id="timetable">
-        <header class="chapter__head">
-          <div>
-            <span class="plate plate--small">Timetable</span>
-            <h2 class="chapter__title">Decisions, <em>posted.</em></h2>
-          </div>
-          <p class="chapter__aside">Each architecture decision record states the context, the call, and what it costs.</p>
-        </header>
-
-        <ol class="timetable">
+        <div class="cell"><svg data-yard="desk" aria-hidden="true"></svg></div>
+        <div class="switches" data-switches>
           {
-            adrs.map(([no, title, file, tag]) => (
-              <li>
-                <a href={`${repo}/blob/main/docs/adr/${file}`}>
-                  <span class="no mono">{no}</span>
-                  <span class="title">{title}</span>
-                  <span class="mono caps" style="color:var(--cream-dim)">{tag}</span>
-                </a>
-              </li>
+            switches.map((s) => (
+              <div class="switch" data-key={s.key}>
+                <div>
+                  <b>{s.name}</b>
+                  <span class="state mono" />
+                </div>
+                <div class="track" role="switch" tabindex="0" aria-checked="false" aria-label={s.name}>
+                  <span class="knob">OFF</span>
+                </div>
+              </div>
             ))
           }
-        </ol>
-
-        <div class="terminal">
-          <pre set:html={quickstart} />
         </div>
       </section>
-    </main>
 
-    <footer class="colophon mono caps">
-      <span>Set in Archivo &amp; Fragment Mono</span>
-      <span class="plate plate--small">Switchyard</span>
-      <a href={repo}>github.com/toni-bobocel/switchyard</a>
-    </footer>
+      <section class="box" id="decisions">
+        <div class="head">
+          <div>
+            <span class="label">On the record</span>
+            <Title text="Decisions" />
+          </div>
+          <div class="head__side">
+            <p>Short architecture decision records: the context, the call, and what it costs.</p>
+            <a class="btn btn--ghost" href={`${repo}/tree/main/docs/adr`}>All records »</a>
+          </div>
+        </div>
+        {
+          adrs.map((a) => (
+            <a class="entry" href={`${repo}/blob/main/docs/adr/${a.file}`}>
+              <div>
+                <h3>{a.title}</h3>
+                <p>{a.gist}</p>
+              </div>
+              <span class="label">{a.tag}</span>
+              <span class="arrow">↗</span>
+            </a>
+          ))
+        }
+      </section>
+
+      <section class="box" id="stack">
+        <div class="head">
+          <div>
+            <span class="label">Toolbox</span>
+            <Title text="Built with" />
+          </div>
+          <div class="head__side">
+            <p>No framework on the server beyond a router, no database server for the ledger, nothing unused.</p>
+          </div>
+        </div>
+        <div class="grid4">{stack.map((s) => <div><b>{s}</b></div>)}</div>
+      </section>
+
+      <footer class="box" id="sdk">
+        <div class="foot__top">
+          <div>
+            <span class="label">Point your SDK here</span>
+            <h2>One base URL away</h2>
+            <pre class="code" set:html={quickstart} />
+          </div>
+          <nav aria-label="Sections">
+            <span class="label">Navigate</span>
+            {nav.map(([name, href]) => <a href={href}>{name}</a>)}
+          </nav>
+          <nav aria-label="Source">
+            <span class="label">Source</span>
+            <a href={repo}>GitHub</a>
+            <a href={`${repo}/tree/main/docs/adr`}>Decisions</a>
+            <a href={`${repo}/blob/main/switchyard.example.json`}>Example config</a>
+            <a href={`${repo}/blob/main/LICENSE`}>Licence</a>
+          </nav>
+        </div>
+        <div>
+          <canvas class="signature" data-signature aria-label="Switchyard"></canvas>
+          <p class="label" style="text-align:center;margin:0 0 1.4rem">Click to scatter</p>
+        </div>
+        <div class="legal label">
+          <span>© 2026 Toni Bobocel</span>
+          <span>MIT licence</span>
+        </div>
+      </footer>
+    </div>
 
     <script>
       import '../scripts/main.ts'

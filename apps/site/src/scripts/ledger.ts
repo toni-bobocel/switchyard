@@ -51,7 +51,6 @@ type Group = 'feature' | 'team' | 'model'
 const usd = (n: number) => (n ? `$${n.toFixed(2)}` : 'on-prem')
 
 export function ledger(root: HTMLElement, tabs: HTMLElement) {
-  const max = Math.max(...ROWS.map((r) => r.cost))
   const rows = new Map<string, HTMLElement>()
 
   for (const r of ROWS) {
@@ -62,7 +61,6 @@ export function ledger(root: HTMLElement, tabs: HTMLElement) {
       <span class="feature">${r.feature}</span>
       <span class="mono team">${r.team}</span>
       <span class="mono model">${r.model}</span>
-      <span class="bar"><i style="width:${(r.cost / max) * 100}%"></i></span>
       <span class="mono cost">${usd(r.cost)}</span>`
     rows.set(r.feature, el)
   }

@@ -14,7 +14,9 @@ change one base URL; from then on every prompt passes the same box, where it is:
 [Decisions](docs/adr) ·
 [Gateway tests](apps/gateway/test/gateway.test.ts)
 
-![Panel](docs/img/panel.jpg)
+![Switchyard](docs/img/panel.jpg)
+
+![Live traffic](docs/img/live.jpg)
 
 ## Why it exists
 
@@ -101,6 +103,8 @@ container for the on-prem tier.
   needs an explicit answer for what happens on fallback before it is exposed.
 
 ![Ledger](docs/img/ledger.jpg)
+
+![Control room](docs/img/control.jpg)
 
 ## Layout
 

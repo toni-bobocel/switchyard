@@ -150,13 +150,13 @@ export class Yard {
       this.#rails.set(`team:${team.name}`, [path])
       const y = teamY(i)
       labels.append(
-        Object.assign(el('text', { x: 24, y: y - 12, class: 'label' }), {
+        Object.assign(el('text', { x: 24, y: y - 12, class: 'name' }), {
           textContent: team.name.toUpperCase(),
         }),
-        Object.assign(el('text', { x: 24, y: y + 20, class: 'sub' }), {
+        Object.assign(el('text', { x: 24, y: y + 20, class: 'meta' }), {
           textContent: team.residency ? `residency ${team.residency.join(' + ')}` : 'any region',
         }),
-        el('rect', { x: 14, y: y - 7, width: 10, height: 14, rx: 2, fill: '#e6dec6' }),
+        el('rect', { x: 18, y: y - 4, width: 6, height: 8, fill: '#e6e2d6' }),
       )
     })
 
@@ -168,20 +168,14 @@ export class Yard {
       rails.append(path)
       this.#rails.set(`model:${model.name}`, [path])
       const y = platformY(i)
-      const lamp = el('circle', { cx: PLATFORM_END + 18, cy: y, r: 7, class: 'lamp' })
+      const lamp = el('circle', { cx: PLATFORM_END + 18, cy: y, r: 5, class: 'lamp' })
       this.#lamps.set(model.name, lamp)
       const regionText = Object.assign(
-        el('text', { x: 1046, y: y - 10, class: 'region', 'text-anchor': 'end' }),
-        {
-          textContent: model.region.toUpperCase(),
-        },
-      )
-      regionText.setAttribute(
-        'fill',
-        model.region === 'us' ? '#f0a58f' : model.region === 'eu' ? '#9cc4ff' : '#7fd18b',
+        el('text', { x: 1080, y: y - 10, class: 'region', 'text-anchor': 'end' }),
+        { textContent: model.region.toUpperCase() },
       )
       labels.append(
-        Object.assign(el('text', { x: 900, y: y - 10, class: 'label' }), {
+        Object.assign(el('text', { x: 900, y: y - 10, class: 'name' }), {
           textContent: model.name,
         }),
         regionText,
@@ -227,7 +221,7 @@ export class Yard {
         class: 'gate-label',
         'text-anchor': 'middle',
       }),
-      { textContent: 'SWITCHYARD' },
+      { textContent: 'gate' },
     )
     this.#gateSub = Object.assign(
       el('text', {
@@ -343,7 +337,7 @@ export class Yard {
 
     const route = el('path', { d: toD(pts), class: 'route' })
     const train = el('g', { class: `train${d.pii ? ' is-pii' : ''}` })
-    train.append(el('rect', { x: -15, y: -5, width: 30, height: 10, rx: 5 }))
+    train.append(el('rect', { x: -12, y: -3, width: 24, height: 6 }))
     this.#trains.append(route, train)
 
     const done = () => {

@@ -1,0 +1,16 @@
+---
+import { markSvg } from '../mark'
+
+interface Props {
+  text: string
+  tag?: 'h1' | 'h2'
+}
+
+const { text, tag: Tag = 'h2' } = Astro.props
+const words = text.split(' ')
+const last = words.pop()
+---
+
+<Tag aria-label={text}>
+  {words.length > 0 && `${words.join(' ')} `}<span class="nowrap">{last}<span class="mark" set:html={markSvg} /></span>
+</Tag>

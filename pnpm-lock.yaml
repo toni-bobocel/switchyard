@@ -222,10 +222,10 @@ importers:
 
   apps/site:
     dependencies:
-      '@fontsource-variable/archivo':
+      '@fontsource-variable/funnel-display':
         specifier: ^5.3.0
         version: 5.3.0
-      '@fontsource/fragment-mono':
+      '@fontsource-variable/funnel-sans':
         specifier: ^5.3.0
         version: 5.3.0
       astro:
@@ -676,11 +676,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource-variable/archivo@5.3.0':
-    resolution: {integrity: sha512-HogK8FJelrD1o7TlZlkIVtHgc20bO5PZRWE7mUeUTdMN055alznQV6/00J00IBeu8FQAH4s3zW9UJNvKExXf+g==}
+  '@fontsource-variable/funnel-display@5.3.0':
+    resolution: {integrity: sha512-o/12lyrfflx5QAQFa+hAl0uBeWoBUAm5w71j+KssBseo++XJT3tnveDSg5IAnAdiclQHfFuEZiL5Wn2BjuFxtw==}
 
-  '@fontsource/fragment-mono@5.3.0':
-    resolution: {integrity: sha512-vpOLZhWq7Z6wUPo1qMl16Y4yjQJiN0d9TXX2oUtiYXmqUrXU23Wuto73Knyak+osdlIuHz46srpBZb2pfhHCIA==}
+  '@fontsource-variable/funnel-sans@5.3.0':
+    resolution: {integrity: sha512-NOgHy3KWMAJdl33XSESit33nI8vlFZh8/0E3tLD7z5jJA5gQoLeUkFcZtxehVVkyYpAZ747tF8O/kAHXXa96ZA==}
 
   '@hono/node-server@2.1.11':
     resolution: {integrity: sha512-KzKz9vl4vvr1vgLHamj+g5uonbrj5NwAdO3yzOS6cd2HjALVeOgTgeZOyAzNxejbkfOOPIcvuf/Tg8l1pEFLog==}
@@ -2450,9 +2450,9 @@ snapshots:
   '@esbuild/win32-x64@0.28.2':
     optional: true
 
-  '@fontsource-variable/archivo@5.3.0': {}
+  '@fontsource-variable/funnel-display@5.3.0': {}
 
-  '@fontsource/fragment-mono@5.3.0': {}
+  '@fontsource-variable/funnel-sans@5.3.0': {}
 
   '@hono/node-server@2.1.11(hono@4.13.21)':
     dependencies:

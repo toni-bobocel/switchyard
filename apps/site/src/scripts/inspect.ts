@@ -14,8 +14,8 @@ const TOKEN_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789⟦⟧'
 export function inspectDesk(root: HTMLElement) {
   const prompt = [...root.querySelectorAll<HTMLElement>('[data-prompt] .pii')]
   const answer = [...root.querySelectorAll<HTMLElement>('[data-answer] .pii')]
-  const checks = [...root.querySelectorAll<HTMLElement>('.checks li')]
-  const answerBody = root.querySelector<HTMLElement>('[data-answer] .ticket__body')
+  const checks = [...root.querySelectorAll<HTMLElement>('.checks [data-kind]')]
+  const answerBody = root.querySelector<HTMLElement>('[data-answer] .doc__body')
   const stamp = root.querySelector<HTMLElement>('.stamp')
   if (!answerBody || !stamp) return () => {}
 
@@ -57,8 +57,9 @@ export function inspectDesk(root: HTMLElement) {
       ).add(() => check?.classList.add('is-on'), i * 0.45 + 0.5)
     })
 
+    stamp.classList.toggle('is-stop', block)
     if (block) {
-      stamp.textContent = '422 · refused'
+      stamp.textContent = '422 · refused before routing'
       tl.to(stamp, { autoAlpha: 1, scale: 1, duration: 0.35, ease: 'back.out(3)' }, '+=0.3')
       return
     }
